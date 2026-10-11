@@ -1,0 +1,7 @@
+# ./frontend_angular/.dockerignore
+node_modules/
+dist/
+.angular/
+.vscode/
+*.log
+.DS_Store
