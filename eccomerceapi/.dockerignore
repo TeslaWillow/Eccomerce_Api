@@ -1,0 +1,9 @@
+# ./backend_spring/.dockerignore
+target/
+.mvn/
+.settings/
+.classpath
+.project
+.vscode/
+*.log
+.DS_Store
