@@ -3,13 +3,17 @@ package com.myeccomerce.eccomerceapi.security;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,21 +46,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = headerAuth.substring(7);
         // Validate token
         if (jwtUtils.validateToken(token)) {
-            String email = jwtUtils.getEmailFromToken(token);
+            Claims claims = jwtUtils.getAllClaimsFromToken(token);
+            String email = claims.getSubject();
+            String role = claims.get("role", String.class);
+            // Extraemos el rol del token
 
-            // Create Authentication object for Spring Security
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    email, null, Collections.emptyList()
-            );
-            // Almacena esa información dentro del objeto de autenticación.
-            authentication.setDetails(
-                // Analiza la petición y extrae información contextual, 
-                // principalmente la dirección IP de origen del cliente y el ID de sesión (si existiera).
-                new WebAuthenticationDetailsSource().buildDetails(request)
-            );
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // Mapear el rol a una autoridad de Spring Security
+                List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
 
-            // Establecer el usuario autenticado en el contexto de seguridad
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        email, null, authorities);
+
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                // Registrar la autenticación y el rol en el contexto de seguridad
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
 
         filterChain.doFilter(request, response); // Continue with the chain for next filter

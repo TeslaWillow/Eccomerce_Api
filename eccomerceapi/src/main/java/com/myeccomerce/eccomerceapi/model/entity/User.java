@@ -3,6 +3,8 @@ package com.myeccomerce.eccomerceapi.model.entity;
 
 import com.myeccomerce.eccomerceapi.model.enums.Role;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -36,6 +38,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @JsonIgnore // <-- Esto oculta la contraseña bajo ninguna circunstancia en las respuestas JSON
     private String password; // Null si el usuario se registra o inicia sesión por Google OAuth2
 
     @Column(nullable = false)

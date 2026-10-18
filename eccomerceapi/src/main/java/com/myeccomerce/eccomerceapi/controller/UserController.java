@@ -18,12 +18,12 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/users")
-@RequiredArgsConstructor
+@RequiredArgsConstructor // Inyecta UserService
 public class UserController {
 
     private final UserService userService;
 
-    @PatchMapping("/{userId}/role")
+    @PatchMapping("/{userId}/role") 
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> updateRole(
             @PathVariable Long userId,
